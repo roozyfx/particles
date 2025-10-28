@@ -6,17 +6,22 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g                \
                         -O0 -Wall -Wextra -Wpedantic            \
-                        -Weffc++ -fsanitize=address,undefined   \
+                        -fsanitize=address,undefined            \
                         -Wfloat-equal                           \
                         -fno-omit-frame-pointer")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ ")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Weffc++")
+endif()
 
 set(src 
     main.cpp
 
     src/particle.cpp
     src/particleSystem.cpp
-    src/point.cpp
 )
 
 set(hdrs
