@@ -3,8 +3,8 @@
 #include <sstream>
 #include <string>
 
-#include "../src/types.hpp"
-#include "../src/vectors.h"
+#include "../src/sim/types.hpp"
+#include "../src/sim/vectors.h"
 
 TEST(VectorTest, BasicOperations) {
   Vec3d x(1, 0, 0);

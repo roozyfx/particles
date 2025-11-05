@@ -9,36 +9,42 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g                \
                         -fsanitize=address,undefined            \
                         -Wfloat-equal                           \
                         -fno-omit-frame-pointer")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -march=native -DNDEBUG")
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ ")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Weffc++")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Weffc++")
+endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_compile_definitions("DEBUG")
 endif()
 
 set(src 
-    main.cpp
-
-    src/particle.cpp
-    src/particleSystem.cpp
-)
+    src/main.cpp 
+    src/sim/particle.cpp 
+    src/sim/particles_aos.cpp)
 
 set(hdrs
     src/utils/logger.h
-
-    src/particle.h
-    src/particleSystem.h
-    src/point.h
-    src/vectors.h
-    src/types.hpp
-)
+    src/sim/particle.h
+    src/sim/particles_aos.h
+    src/sim/point.h
+    src/sim/vectors.h
+    src/sim/types.hpp
+    src/sim/constants.hpp)
 
 include_directories(src)
 
 add_executable(${CMAKE_PROJECT_NAME} ${src} ${hdrs})
-target_link_libraries(${CMAKE_PROJECT_NAME} pthread)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE pthread)
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DPARALLEL")
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE tbb)
+endif()
 
-enable_testing()
-add_subdirectory(tests)
+enable_testing() 
+add_subdirectory(tests) 
 add_subdirectory(benchmark)

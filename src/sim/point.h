@@ -2,7 +2,6 @@
 #include <limits>
 #include <stdfloat>
 
-#include "constants.hpp"
 #include "vectors.h"
 
 // requires std::floating_point<T>
@@ -29,7 +28,7 @@ struct Point {
   // }
 
   bool operator==(const Point&) = delete;
-  bool IsAlmostEqual(
+  bool constexpr IsAlmostEqual(
       const Point& rhs,
       T epsilon = std::numeric_limits<T>::epsilon()) const noexcept {
     return std::abs(x - rhs.x) < epsilon && std::abs(y - rhs.y) < epsilon &&

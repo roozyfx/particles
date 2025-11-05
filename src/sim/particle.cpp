@@ -24,8 +24,6 @@ VectorType Particle::ForceFrom(const std::vector<Particle>& particles,
     F += (-Gm) * particle.m * denom * r;
   }
 
-  // std::cout << "p: {" << p << "}, v: {" << v << "}, m: " << m << std::endl;
-  // std::cout << "F: (" << F << ")" << std::endl;
   return F;
 }
 

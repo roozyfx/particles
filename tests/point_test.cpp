@@ -1,12 +1,12 @@
-#include "../src/point.h"
+#include "../src/sim/point.h"
 
 #include <gtest/gtest.h>
 
 #include <sstream>
 #include <string>
 
-#include "../src/types.hpp"
-#include "../src/vectors.h"
+#include "../src/sim/types.hpp"
+#include "../src/sim/vectors.h"
 
 TEST(PointTest, BasicOpeartionAndMethods) {
   Point3d p(1, 2, 3);
