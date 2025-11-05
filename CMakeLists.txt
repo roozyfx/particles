@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.60)
 
-PROJECT(Particles)
-SET(CMAKE_CXX_STANDARD 23)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(Particles)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g                \
                         -O0 -Wall -Wextra -Wpedantic            \
@@ -41,3 +41,4 @@ target_link_libraries(${CMAKE_PROJECT_NAME} pthread)
 
 enable_testing()
 add_subdirectory(tests)
+add_subdirectory(benchmark)
