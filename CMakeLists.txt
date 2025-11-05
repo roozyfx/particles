@@ -30,6 +30,7 @@ set(src
 set(hdrs
     src/utils/logger.h
     src/sim/particle.h
+    src/sim/particles.h
     src/sim/particles_rawpointer.h
     src/sim/particles_aos.h
     src/sim/point.h
