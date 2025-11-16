@@ -5,10 +5,10 @@
 #include <print>
 #include <vector>
 
+#include "sim/linear_algebra.h"
 #include "sim/particle.h"
 #include "sim/particles.h"
 #include "sim/particles_aos.h"
-#include "sim/vectors.h"
 #include "utils/logger.h"
 #include "utils/rng.h"
 

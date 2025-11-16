@@ -33,8 +33,7 @@ set(hdrs
     src/sim/particles.h
     src/sim/particles_rawpointer.h
     src/sim/particles_aos.h
-    src/sim/point.h
-    src/sim/vectors.h
+    src/sim/linear_algebra.h
     src/sim/types.hpp
     src/sim/constants.hpp)
 

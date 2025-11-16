@@ -20,7 +20,7 @@
  * A Particle System, as a Struct of Arrays of properties
  */
 template <std::floating_point T = double>
-struct Particles {
+class Particles {
   // number of particles
   size_t n;
   T d_t;
@@ -33,14 +33,13 @@ struct Particles {
   // velocity
   VecT vx, vy, vz;
 
-  // acceleration, Beschleunigung
-  VecT ax, ay, az;
   // Force on each particle. This is temporary, if I choose Gravity between
   // particles as a the simulated force.
   VecT Fx, Fy, Fz;
   static T constexpr epsilon{T(0.0001)};
   static T constexpr eps2{epsilon * epsilon};
 
+ public:
   Particles(const size_t n, const T d_t)
       : n{n},
         d_t{d_t},
@@ -52,9 +51,6 @@ struct Particles {
         vx{VecT(n)},
         vy{VecT(n)},
         vz{VecT(n)},
-        ax{VecT(n)},
-        ay{VecT(n)},
-        az{VecT(n)},
         Fx{VecT(n)},
         Fy{VecT(n)},
         Fz{VecT(n)} {
@@ -140,25 +136,22 @@ struct Particles {
     using std::begin;
     using std::end;
 
-    // Update acceleration of each particle
-    VecT inv_m;
-    inv_m.reserve(n);
-    std::for_each_n(PAR begin(m), n, [](T& el) { return T(1.) / el; });
-    // acceleration = Force / m
-    std::transform(PAR begin(Fx), end(Fx), begin(inv_m), begin(ax),
-                   std::multiplies<T>());
-    std::transform(PAR begin(Fy), end(Fy), begin(inv_m), begin(ay),
-                   std::multiplies<T>());
-    std::transform(PAR begin(Fz), end(Fz), begin(inv_m), begin(az),
-                   std::multiplies<T>());
-
-    // velocity += acceleration * d_t
-    std::transform(PAR begin(ax), end(ax), begin(vx), begin(vx),
-                   [dt = d_t](const T& a, T& v) { return std::fma(a, dt, v); });
-    std::transform(PAR begin(ay), end(ay), begin(vy), begin(vy),
-                   [dt = d_t](const T& a, T& v) { return std::fma(a, dt, v); });
-    std::transform(PAR begin(az), end(az), begin(vz), begin(vz),
-                   [dt = d_t](const T& a, T& v) { return std::fma(a, dt, v); });
+    // velocity += F/m * d_t
+    // x
+    std::transform(PAR begin(Fx), end(Fx), begin(m), begin(Fx),
+                   [dt = d_t](const T& f, const T& m) { return f * dt / m; });
+    std::transform(PAR begin(Fx), end(Fx), begin(vx), begin(vx),
+                   [](const T& f, const T& v) { return f + v; });
+    // y
+    std::transform(PAR begin(Fy), end(Fy), begin(m), begin(Fy),
+                   [dt = d_t](const T& f, const T& m) { return f * dt / m; });
+    std::transform(PAR begin(Fy), end(Fy), begin(vy), begin(vy),
+                   [](const T& f, const T& v) { return f + v; });
+    // z
+    std::transform(PAR begin(Fz), end(Fz), begin(m), begin(Fz),
+                   [dt = d_t](const T& f, const T& m) { return f * dt / m; });
+    std::transform(PAR begin(Fz), end(Fz), begin(vz), begin(vz),
+                   [](const T& f, const T& v) { return f + v; });
 
     // position += velocity * d_t
     std::transform(PAR begin(vx), end(vx), begin(x), begin(x),
@@ -201,8 +194,7 @@ struct Particles {
       std::printf(
           "particle %zd\tp(%.2f,%.2f, %.2f)\tm: %.2f\tv(%.2f, %.2f,%.2f)\n", i,
           x[i], y[i], z[i], m[i], vx[i], vy[i], vz[i]);
-      std::printf("\t\ta(%.2f,%.2f, %.2f)\tF(%.2f, %.2f,%.2f)\n", ax[i], ay[i],
-                  az[i], Fx[i], Fy[i], Fz[i]);
+      std::printf("\tF(%.2f, %.2f,%.2f)\n", Fx[i], Fy[i], Fz[i]);
     }
   }
 };

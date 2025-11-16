@@ -2,8 +2,7 @@
 #include <limits>
 #include <vector>
 
-#include "point.h"
-#include "vectors.h"
+#include "linear_algebra.h"
 
 using PointType = Point3d;
 using VectorType = Vec3d;
