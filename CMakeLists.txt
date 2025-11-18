@@ -3,24 +3,12 @@ cmake_minimum_required(VERSION 3.60)
 project(Particles)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "-pthread")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g                \
-                        -O0 -Wall -Wextra -Wpedantic            \
-                        -fsanitize=address,undefined            \
-                        -Wfloat-equal                           \
-                        -fno-omit-frame-pointer")
-
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -march=native -DNDEBUG")
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ ")
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Weffc++")
-endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_definitions("DEBUG")
 endif()
+
+find_package(Threads REQUIRED)
 
 set(src 
     src/main.cpp 
@@ -39,11 +27,30 @@ set(hdrs
 
 include_directories(src)
 
-add_executable(${CMAKE_PROJECT_NAME} ${src} ${hdrs})
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE pthread)
+set(BINARY_TARGET particles)
+add_executable(${BINARY_TARGET} ${src} ${hdrs})
+target_compile_options(${BINARY_TARGET} PRIVATE -pthread)
+target_compile_options(${BINARY_TARGET} PRIVATE 
+                        -Wall -Wextra -Wpedantic
+                        $<$<CONFIG:Debug>:-g;-fsanitize=address,undefined;-O0;-Wfloat-equal;-fno-omit-frame-pointer>
+                        $<$<CONFIG:Release>:-O3;-march=native;-DNDEBUG>)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  target_compile_options(${BINARY_TARGET} -stdlib=libc++)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  target_compile_options(${BINARY_TARGET} PRIVATE 
+                        $<$<CONFIG:Debug>:-Weffc++>)
+endif()
+
+target_link_options(${BINARY_TARGET} PRIVATE
+    $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+)
+
+target_link_libraries(${BINARY_TARGET} PRIVATE Threads::Threads)
+
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DPARALLEL")
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE tbb)
+  target_link_libraries(${BINARY_TARGET} PRIVATE tbb)
 endif()
 
 enable_testing() 
