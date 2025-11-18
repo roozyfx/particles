@@ -44,8 +44,6 @@ void ArrayOfStruct() {
   const size_t cycles{2};
   for (size_t steps = 0; steps < cycles; ++steps) {
     ps->UpdateN2(F_ext, F_global, d_t);
-    // if (static_cast<long long>(t) % 5 == 0)
-    // std::cout << *ps << std::endl;
   }
   const auto duration = std::chrono::system_clock::now() - start;
   std::cout << "Took "

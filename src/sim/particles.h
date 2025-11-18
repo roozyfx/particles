@@ -2,9 +2,8 @@
 
 #include <cmath>
 #include <concepts>
-#include <iostream>
-// #include <print>
 #include <cstdio>
+#include <iostream>
 #include <vector>
 #ifdef PARALLEL
 #include <execution>
@@ -83,9 +82,9 @@ class Particles {
   void UpdateForces(const VecT& F_ext_x, const VecT& F_ext_y,
                     const VecT& F_ext_z, const T& F_global_x,
                     const T& F_global_y, const T& F_global_z) {
-    std::fill(begin(Fx), end(Fx), T(0));
-    std::fill(begin(Fy), end(Fy), T(0));
-    std::fill(begin(Fz), end(Fz), T(0));
+    std::fill(PAR begin(Fx), end(Fx), T(0));
+    std::fill(PAR begin(Fy), end(Fy), T(0));
+    std::fill(PAR begin(Fz), end(Fz), T(0));
 
     for (size_t i = 0; i < n; ++i) {
       for (size_t j = i + 1; j < n; ++j) {
@@ -93,6 +92,7 @@ class Particles {
         const T ry{y[j] - y[i]};
         const T rz{z[j] - z[i]};
 
+        // eps² for smoothing
         const T r2{rx * rx + ry * ry + rz * rz + eps2};
         using std::sqrt;
         const T inv_r{T(1.) / sqrt(r2)};
@@ -113,20 +113,23 @@ class Particles {
       }
     }
 
-    // TODO use STL
     // Add external Force to each particle, if exists
     if (!F_ext_x.empty())
-      for (size_t i = 0; i < n; ++i) Fx[i] += F_ext_x[i];
+      std::transform(PAR std::begin(Fx), std::end(Fx), std::begin(F_ext_x),
+                     std::begin(Fx), std::plus<>{});
     if (!F_ext_y.empty())
-      for (size_t i = 0; i < n; ++i) Fy[i] += F_ext_y[i];
+      std::transform(PAR std::begin(Fy), std::end(Fy), std::begin(F_ext_y),
+                     std::begin(Fy), std::plus<>{});
     if (!F_ext_z.empty())
-      for (size_t i = 0; i < n; ++i) Fz[i] += F_ext_z[i];
+      std::transform(PAR std::begin(Fz), std::end(Fz), std::begin(F_ext_z),
+                     std::begin(Fz), std::plus<>{});
     // Add global force
-    for (size_t i = 0; i < n; ++i) {
-      Fx[i] += F_global_x;
-      Fy[i] += F_global_y;
-      Fz[i] += F_global_z;
-    }
+    std::for_each(PAR std::begin(Fx), std::end(Fx),
+                  [f_g = F_global_x](auto& f) { f += f_g; });
+    std::for_each(PAR std::begin(Fy), std::end(Fy),
+                  [f_g = F_global_y](auto& f) { f += f_g; });
+    std::for_each(PAR std::begin(Fz), std::end(Fz),
+                  [f_g = F_global_z](auto& f) { f += f_g; });
   }
 
   /**
