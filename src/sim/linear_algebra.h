@@ -136,6 +136,10 @@ struct Point : public Tuple<Point, T> {
     return *this;
   }
 
+  template <typename U>
+  friend inline Point<T> operator+(const Point<T>& p, const Vector<U> u) {
+    return {p.x + u.x, p.y + u.y, p.z + u.z};
+  }
   // template <typename U>
   // friend inline Vector<U> operator-(const Point<T>& e, const Point<T> s) {
   //   return Vector<U>(e.x - s.x, e.y - s.y, e.z - s.z);

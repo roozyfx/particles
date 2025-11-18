@@ -19,5 +19,4 @@ MACRO(add_test test_name)
   gtest_discover_tests(${test_name})
 ENDMACRO()
 
-add_test(vector_test)
-add_test(point_test)
+add_test(linear_algebra_test)
