@@ -1,11 +1,17 @@
 find_package(benchmark REQUIRED)
+find_package(Threads REQUIRED)
 
-# set(_GNU_SOURCE ON)
-MACRO(add_bench benchmark_name)
+MACRO(add_benchmark benchmark_name)
   add_executable(${benchmark_name} ${benchmark_name}.cpp)
-  target_link_libraries(${benchmark_name} PRIVATE
+  target_link_libraries(${benchmark_name} 
     benchmark::benchmark
-    benchmark::benchmark_main)
+    benchmark::benchmark_main
+    Threads::Threads
+    tbb)
+
+  target_compile_options(${benchmark_name} PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+
+  target_link_options(${benchmark_name} PRIVATE -fsanitize=address)
 ENDMACRO()
 
-add_bench(benchmark_0)
+add_benchmark(benchmark_0)
