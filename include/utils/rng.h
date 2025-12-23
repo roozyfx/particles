@@ -26,7 +26,6 @@ class RNG {
    * @param data : the raw array
    */
   void GenerateUniformRandom(T* data, const size_t n, const T& low,
-                             const T& high);
+                             const T& high)
+    requires std::floating_point<T>;
 };
-
-#include "rng.cpp"

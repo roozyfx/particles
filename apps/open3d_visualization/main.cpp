@@ -71,7 +71,7 @@ void SunEarthSystem() {
 }
 
 int main() {
-  const size_t num_particles{4000};
+  const size_t num_particles{1000};
   const double d_t{1.};
   Particles<> par_sys(num_particles, d_t);
 
@@ -89,7 +89,7 @@ int main() {
   rng.GenerateUniformRandom(Fext_z.data(), num_particles, 0., 0.);
 #endif
   auto start_the_clock = std::chrono::system_clock::now();
-  for (size_t step = 0; step < 200; ++step) {
+  for (size_t step = 0; step < 100; ++step) {
     par_sys.Update(Fext_x, Fext_y, Fext_z, 0., 0., 0.);
   }
   auto duration = std::chrono::system_clock::now() - start_the_clock;

@@ -1,9 +1,8 @@
-#include "particle.h"
-
 #include <iostream>
 #include <numeric>
 
-#include "constants.hpp"
+#include "sim/constants.hpp"
+#include "sim/particle.h"
 
 VectorType Particle::ForceFrom(const std::vector<Particle>& particles,
                                const std::vector<VectorType>& F_ext,

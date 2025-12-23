@@ -1,11 +1,10 @@
-#include "../src/sim/linear_algebra.h"
-
 #include <gtest/gtest.h>
 
 #include <sstream>
 #include <string>
 
-#include "../src/sim/types.hpp"
+#include "sim/linear_algebra.h"
+#include "sim/types.hpp"
 
 TEST(PointTest, BasicOpeartionAndMethods) {
   Point3d p(1, 2, 3);

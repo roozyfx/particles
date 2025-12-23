@@ -1,8 +1,8 @@
 #include <benchmark/benchmark.h>
 
-#include "../src/sim/particles.h"
-#include "../src/utils/logger.h"
-#include "../src/utils/rng.h"
+#include "sim/particles.h"
+#include "utils/logger.h"
+#include "utils/rng.h"
 
 // Define benchmark
 static void BM_ParticleUpdate(benchmark::State& state) {

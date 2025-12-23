@@ -12,8 +12,8 @@
 #define PAR
 #endif
 
-#include "../utils/rng.h"
-#include "constants.hpp"
+#include "sim/constants.hpp"
+#include "utils/rng.h"
 
 /**
  * A Particle System, as a Struct of Arrays of properties

@@ -1,4 +1,8 @@
-#include "rng.h"
+#include <random>
+#include <type_traits>
+
+#include "sim/linear_algebra.h"
+#include "utils/rng.h"
 
 template <typename T>
 vector<T> RNG<T>::GenerateUniformRandom(const size_t n, const T& low,
@@ -40,11 +44,11 @@ vector<T> RNG<T>::GenerateUniformRandom(const size_t n, const T& low,
 
 template <typename T>
 void RNG<T>::GenerateUniformRandom(T* data, const size_t n, const T& low,
-                                   const T& high) {
-  if (!std::is_floating_point_v<T>) return;
+                                   const T& high)
+  requires std::floating_point<T>
+{
   // check if the low-high range is correct
   if (!(low < high)) return;
-
   // Will be used to obtain a seed for the random number engine
   std::random_device rd;
   // Standard mersenne_twister_engine seeded with rd()
@@ -57,3 +61,8 @@ void RNG<T>::GenerateUniformRandom(T* data, const size_t n, const T& low,
     data[i] = dis(gen);
   }
 }
+
+template class RNG<double>;
+template class RNG<float>;
+template class RNG<Point3d>;
+template class RNG<Vec3d>;

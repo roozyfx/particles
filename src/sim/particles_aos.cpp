@@ -1,6 +1,6 @@
-#include "particles_aos.h"
-
 #include <algorithm>
+
+#include "sim/particles_aos.h"
 
 ParticleSystemAoS::ParticleSystemAoS(const size_t n) { particles_.reserve(n); }
 ParticleSystemAoS::ParticleSystemAoS(std::vector<Particle>&& particles) {
