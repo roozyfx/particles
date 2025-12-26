@@ -24,8 +24,12 @@ class Particles {
   size_t n;
   T d_t;
   using VecT = std::vector<T>;
+
+ public:
   // Positions
   VecT x, y, z;
+
+ private:
   // Masses
   VecT m;
   VecT Gm;
@@ -175,9 +179,9 @@ class Particles {
 
     rng.GenerateUniformRandom(m.data(), n, 1., 200.);
 
-    rng.GenerateUniformRandom(vx.data(), n, -20., 20.);
-    rng.GenerateUniformRandom(vy.data(), n, -20., 20.);
-    rng.GenerateUniformRandom(vz.data(), n, -20., 20.);
+    rng.GenerateUniformRandom(vx.data(), n, 0., 0.);
+    rng.GenerateUniformRandom(vy.data(), n, 0., 0.);
+    rng.GenerateUniformRandom(vz.data(), n, 0., 0.);
   }
 
  public:

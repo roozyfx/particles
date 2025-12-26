@@ -1,77 +1,39 @@
-#include <algorithm>
+#include <open3d/Open3D.h>
+
+#include <atomic>
 #include <chrono>
-#include <iostream>
 #include <memory>
-#include <print>
-#include <vector>
+#include <thread>
 
-#include "sim/linear_algebra.h"
-#include "sim/particle.h"
 #include "sim/particles.h"
-#include "sim/particles_aos.h"
-#include "utils/logger.h"
-#include "utils/rng.h"
+namespace o3d = open3d;
 
-// To try the Array of Structs implementation
-void ArrayOfStruct() {
-  const size_t num_particles{100};
-  RNG<Point3d> rng_points;
-  std::vector<Point3d> points = rng_points.GenerateUniformRandom(
-      num_particles, Point3d(-1, -1, -1), Point3d(1, 1, 1));
-  RNG<Vec3d> rng_vecs;
-  std::vector<Vec3d> velocities = rng_vecs.GenerateUniformRandom(
-      num_particles, Vec3d(-10, -10, -10), Vec3d(10, 10, 10));
-  RNG<double> rng_mass;
-  std::vector<double> masses =
-      rng_mass.GenerateUniformRandom(num_particles, 1, 200);
+double GetRandom() { return double(std::rand()) / double(RAND_MAX); }
 
-  std::vector<Particle> particles;
-  particles.reserve(num_particles);
-
-  for (size_t i = 0; i < num_particles; ++i) {
-    particles.emplace_back(Particle(points[i], masses[i], velocities[i], i));
+std::shared_ptr<o3d::geometry::PointCloud> MakePointCloud(
+    int npts, const Eigen::Vector3d center, double radius, bool colorize) {
+  auto cloud = std::make_shared<o3d::geometry::PointCloud>();
+  cloud->points_.reserve(npts);
+  for (int i = 0; i < npts; ++i) {
+    cloud->points_.push_back({radius * GetRandom() + center.x(),
+                              radius * GetRandom() + center.y(),
+                              radius * GetRandom() + center.z()});
   }
-  std::vector<Vec3d> F_ext = rng_vecs.GenerateUniformRandom(
-      num_particles, Vec3d(-1, -5, -5), Vec3d(1, 5, 5));
-
-  std::unique_ptr<ParticleSystemAoS> ps =
-      std::make_unique<ParticleSystemAoS>(std::move(particles));
-
-  const auto start{std::chrono::system_clock::now()};
-
-  Vec3d F_global(0, -200, 0);
-  DType d_t = 1;
-  const size_t cycles{2};
-  for (size_t steps = 0; steps < cycles; ++steps) {
-    ps->UpdateN2(F_ext, F_global, d_t);
+  if (colorize) {
+    cloud->colors_.reserve(npts);
+    for (int i = 0; i < npts; ++i) {
+      cloud->colors_.push_back({GetRandom(), GetRandom(), GetRandom()});
+    }
   }
-  const auto duration = std::chrono::system_clock::now() - start;
-  std::cout << "Took "
-            << std::chrono::round<std::chrono::milliseconds>(duration)
-            << " for " << cycles << std::endl;
-}
-
-// TODO earth-sun particle system
-/** Earth - Sun system,
- * with Sun at(0, 0, 0) and not moving.* earth doesn't move as expected
- */
-void SunEarthSystem() {
-  DType earth_to_sun{1.4904e11};
-  Point3d pos_earth(earth_to_sun, 0, 0);
-  DType earth_mass{5.972e24};
-  Vec3d earth_v0(0, 29.78e3, 0);
-  Particle earth(pos_earth, earth_mass, earth_v0, 0);
-
-  Point3d pos_sun(0, 0, 0);
-  DType sun_mass{1.989e30};
-  Vec3d sun_v0(0, 0, 0);
-  Particle sun(pos_sun, sun_mass, sun_v0, 1);
-
-  std::vector<Particle> sun_earth{sun};
+  return cloud;
 }
 
 int main() {
+  o3d::visualization::VisualizerWithKeyCallback visualizer;
+  visualizer.CreateVisualizerWindow("Particle System", 1600, 900, 50, 50);
+
   const size_t num_particles{1000};
+  // const size_t num_steps{5000};
   const double d_t{1.};
   Particles<> par_sys(num_particles, d_t);
 
@@ -88,13 +50,65 @@ int main() {
   rng.GenerateUniformRandom(Fext_y.data(), num_particles, 0., 0.);
   rng.GenerateUniformRandom(Fext_z.data(), num_particles, 0., 0.);
 #endif
-  auto start_the_clock = std::chrono::system_clock::now();
-  for (size_t step = 0; step < 100; ++step) {
-    par_sys.Update(Fext_x, Fext_y, Fext_z, 0., 0., 0.);
-  }
-  auto duration = std::chrono::system_clock::now() - start_the_clock;
-  auto xx = std::chrono::round<std::chrono::milliseconds>(duration);
-  std::println("Took: {}", xx);
+  // auto start_the_clock = std::chrono::system_clock::now();
 
+  auto point_cloud = std::make_shared<o3d::geometry::PointCloud>();
+  point_cloud->points_.resize(num_particles);
+  // Add the initial points
+  for (size_t i = 0; i < num_particles; ++i) {
+    point_cloud->points_[i] = {par_sys.x[i], par_sys.y[i], par_sys.z[i]};
+  }
+  visualizer.AddGeometry(point_cloud);
+
+  auto &option = visualizer.GetRenderOption();
+  option.point_size_ = 5.0;
+
+  std::atomic<bool> running{true};
+  // ESC : close window
+  visualizer.RegisterKeyCallback(GLFW_KEY_ESCAPE, [&](auto *) {
+    running = false;
+    return false;  // keep default ESC behavior
+  });
+
+  // SPACE : pause / resume
+  std::atomic<bool> paused{false};
+  visualizer.RegisterKeyCallback(GLFW_KEY_SPACE, [&](auto *) {
+    paused = !paused;
+    return false;
+  });
+  // b : change background color
+  std::atomic<bool> black_bg{false};
+  visualizer.RegisterKeyCallback(GLFW_KEY_B, [&](auto *) {
+    if (!black_bg) {
+      option.background_color_ = Eigen::Vector3d(0, 0, 0);
+      black_bg = true;
+    } else {
+      option.background_color_ = Eigen::Vector3d(1, 1, 1);
+      black_bg = false;
+    }
+    return false;
+  });
+
+  bool first = true;
+  while (running && visualizer.PollEvents()) {
+    if (!paused) {
+      par_sys.Update(Fext_x, Fext_y, Fext_z, 0., 0, 0.);
+      // TODO Parallel copy
+      for (size_t i = 0; i < num_particles; ++i) {
+        point_cloud->points_[i] = {par_sys.x[i], par_sys.y[i], par_sys.z[i]};
+      }
+      visualizer.UpdateGeometry(point_cloud);
+
+      // do once after first non-empty geometry
+      if (first) {
+        visualizer.ResetViewPoint(true);
+        first = false;
+      }
+    }
+    visualizer.UpdateRender();
+    std::this_thread::sleep_for(std::chrono::milliseconds(16));
+  }
+
+  visualizer.DestroyVisualizerWindow();
   return 0;
 }
