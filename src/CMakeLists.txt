@@ -4,11 +4,9 @@ set(PROJECT_LIBRARY_NAME particles_lib)
 find_package(Threads REQUIRED)
 
 set(src 
-    sim/particle.cpp 
-    sim/particles_aos.cpp
+    sim/particle_structure.cpp 
+    sim/aos_particle_system.cpp
     utils/rng.cpp)
-
-# include_directories(src)
 
 add_library(${PROJECT_LIBRARY_NAME} STATIC ${src})
 
@@ -16,8 +14,8 @@ target_compile_options(${PROJECT_LIBRARY_NAME} PRIVATE
                         -pthread -Wall -Wextra -Wpedantic
                         $<$<CONFIG:Debug>:-g;-O0;-fsanitize=address,undefined;-Wfloat-equal;-fno-omit-frame-pointer>
                         $<$<CONFIG:Release>:-O3;-march=native;-DNDEBUG>)
-    
-target_include_directories(${PROJECT_LIBRARY_NAME} PUBLIC ../include)
+
+target_include_directories(${PROJECT_LIBRARY_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   target_compile_options(${PROJECT_LIBRARY_NAME} -stdlib=libc++)

@@ -2,11 +2,12 @@
 #include <numeric>
 
 #include "sim/constants.hpp"
-#include "sim/particle.h"
+#include "sim/particle_structure.h"
 
-VectorType Particle::ForceFrom(const std::vector<Particle>& particles,
-                               const std::vector<VectorType>& F_ext,
-                               const VectorType& F_global) const noexcept {
+VectorType ParticleStructure::ForceFrom(
+    const std::vector<ParticleStructure>& particles,
+    const std::vector<VectorType>& F_ext,
+    const VectorType& F_global) const noexcept {
   const DType Gm{G * m};
   VectorType Fext = id >= F_ext.size() ? VectorType(0, 0, 0) : F_ext.at(id);
   VectorType F = Fext + F_global;
@@ -26,9 +27,9 @@ VectorType Particle::ForceFrom(const std::vector<Particle>& particles,
   return F;
 }
 
-void Particle::Update(const std::vector<Particle>& particles,
-                      const std::vector<VectorType>& F_ext,
-                      const VectorType& F_global, const DType d_t) {
+void ParticleStructure::Update(const std::vector<ParticleStructure>& particles,
+                               const std::vector<VectorType>& F_ext,
+                               const VectorType& F_global, const DType d_t) {
   auto F{ForceFrom(particles, F_ext, F_global)};
   auto a{F / m};
   UpdatePosition(a, d_t);

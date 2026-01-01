@@ -1,19 +1,21 @@
 #include <algorithm>
 
-#include "sim/particles_aos.h"
+#include "sim/aos_particle_system.h"
 
 ParticleSystemAoS::ParticleSystemAoS(const size_t n) { particles_.reserve(n); }
-ParticleSystemAoS::ParticleSystemAoS(std::vector<Particle>&& particles) {
+ParticleSystemAoS::ParticleSystemAoS(
+    std::vector<ParticleStructure>&& particles) {
   particles_ = std::move(particles);
 }
 
-void ParticleSystemAoS::AddParticles(std::vector<Particle>&& particles) {
+void ParticleSystemAoS::AddParticles(
+    std::vector<ParticleStructure>&& particles) {
   std::move(particles.begin(), particles.end(), std::back_inserter(particles_));
 }
 
 void ParticleSystemAoS::UpdateN2(const std::vector<VectorType>& F_ext,
                                  const VectorType& F_global, const DType& d_t) {
-  for (Particle& el : particles_) {
+  for (ParticleStructure& el : particles_) {
     el.Update(particles_, F_ext, F_global, d_t);
   }
 }

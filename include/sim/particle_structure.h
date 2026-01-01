@@ -11,7 +11,7 @@ using VectorType = Vec3d;
  * hide data members. So, I've made this a struct with direct
  * access to position, mass, velocity and .
  */
-struct Particle {
+struct ParticleStructure {
   // position
   PointType p;
   // mass
@@ -21,15 +21,15 @@ struct Particle {
 
   size_t id;
 
-  Particle(const PointType position, const DType mass,
-           const VectorType velocity, const size_t idx)
+  ParticleStructure(const PointType position, const DType mass,
+                    const VectorType velocity, const size_t idx)
       : p{position}, m{mass}, v{velocity}, id{idx} {}
 
-  Particle(const Particle&) = default;
-  Particle& operator=(const Particle&) = default;
+  ParticleStructure(const ParticleStructure&) = default;
+  ParticleStructure& operator=(const ParticleStructure&) = default;
 
   bool constexpr IsAlmostEqual(
-      const Particle& other,
+      const ParticleStructure& other,
       DType epsilon = std::numeric_limits<DType>::epsilon()) const noexcept {
     return p.IsAlmostEqual(other.p) && std::abs(m - other.m) < epsilon &&
            v.IsAlmostEqual(other.v);
@@ -45,7 +45,7 @@ struct Particle {
    * If this is not the case, that F_ext is ignored.
    * @param F_global  Global force applied to all particles, e.g. gravity.
    */
-  void Update(const std::vector<Particle>& particles,
+  void Update(const std::vector<ParticleStructure>& particles,
               const std::vector<VectorType>& F_ext, const VectorType& F_global,
               const DType d_t);
 
@@ -82,7 +82,7 @@ struct Particle {
    *
    * @note Complexity: O(n) in the number of particles.
    */
-  VectorType ForceFrom(const std::vector<Particle>& particles,
+  VectorType ForceFrom(const std::vector<ParticleStructure>& particles,
                        const std::vector<VectorType>& F_ext,
                        const VectorType& F_global) const noexcept;
 };
